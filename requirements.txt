@@ -1,0 +1,5 @@
+numpy~=1.26.1
+pillow~=10.1.0
+compressai~=1.1.5
+opencv-python~=4.8.1.78
+simpleitk~=2.3.0
