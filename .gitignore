@@ -1,11 +1,11 @@
 # 不忽略这些文件夹
-!/dataset_train/test/.gitkeep
-!/dataset_train/train/.gitkeep
-!/checkpoint/.gitkeep
-!/dataset_val/CLIC 2020 professional/.gitkeep
-!/dataset_val/Kodak/.gitkeep
-!/model/.gitkeep
-!/outputImages/.gitkeep
+!/dataset_train/test/
+!/dataset_train/train/
+!/checkpoint/
+!/dataset_val/CLIC 2020 professional/
+!/dataset_val/Kodak/
+!/model/
+!/outputImages/
 
 .idea
 __pycache__/
