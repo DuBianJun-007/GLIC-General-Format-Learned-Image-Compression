@@ -9,16 +9,5 @@
 
 .idea
 __pycache__/
-model/*
-checkpoint/*
-outputImages/*
-dataset_train/test/*
-dataset_train/train/*
-dataset_val/CLIC 2020 professional/*
-dataset_val/Kodak/*
-dataset_val/CLIC
-dataset_val/outputImages
-dataset_val/picture
-dataset_val/valid
 
 
