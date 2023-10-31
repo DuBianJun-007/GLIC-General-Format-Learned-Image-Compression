@@ -1,3 +1,12 @@
+# 不忽略这些文件夹
+!/dataset_train/test/
+!/dataset_train/train/
+!/checkpoint/
+!/dataset_val/CLIC 2020 professional/
+!/dataset_val/Kodak/
+!/model/
+!/outputImages/
+
 .idea
 __pycache__/
 model/*
@@ -12,11 +21,4 @@ dataset_val/outputImages
 dataset_val/picture
 dataset_val/valid
 
-# 不忽略这些文件夹
-!/dataset_train/test/
-!/dataset_train/train/
-!/checkpoint/
-!/dataset_val/CLIC 2020 professional/
-!/dataset_val/Kodak/
-!/model/
-!/outputImages/
+
