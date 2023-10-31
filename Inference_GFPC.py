@@ -177,7 +177,7 @@ def setup_args() -> argparse.ArgumentParser:
         "--mode",
         type=str,
         default="auto",
-        help='Preprocessing format, optional: ["auto","CHW","HCW"].'
+        help='Preprocessing format, optional: ["auto","CHW","HCW", "C1HC2W"].'
     )
 
     return parser
