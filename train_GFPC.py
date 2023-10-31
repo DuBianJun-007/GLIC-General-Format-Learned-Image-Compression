@@ -22,14 +22,14 @@ import torch.optim as optim
 
 from torch.utils.data import DataLoader
 
-from ModelUtilis.RateDistortionLoss import RateDistortionLoss
-from ModelUtilis.datasets.image import ImageFolder
+from utilis.RateDistortionLoss import RateDistortionLoss
+from utilis.datasets.image import ImageFolder
 from torch.utils.tensorboard import SummaryWriter
 from PIL import ImageFile
 
-from ModelUtilis.optimizers import configure_optimizers
+from utilis.optimizers import configure_optimizers
 
-from ModelUtilis.util import get_run_count, get_checkpoint_from_runpath, save_checkpoint, log_training_stats, \
+from utilis.util import get_run_count, get_checkpoint_from_runpath, save_checkpoint, log_training_stats, \
     AverageMeter, CustomDataParallel
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
