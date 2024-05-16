@@ -1,4 +1,4 @@
-# GFPC-General-Format-Progressive-Learned-Image-Compression
+# GLIC: General Format Learned Image Compression
 
 ## <div align="center">Quick Start Examples</div>
 
@@ -7,14 +7,14 @@
 
 
 Clone repo and
-install [requirements.txt](https://github.com/DuBianJun-007/GFPC-General-Format-Progressive-Learned-Image-Compression/blob/main/requirements.txt)
+install [requirements.txt](https://github.com/DuBianJun-007/GLIC-General-Format-Learned-Image-Compression/blob/main/requirements.txt)
 in a
 [**Python>=3.8.0**](https://www.python.org/) environment, including
 [**PyTorch>=1.7**](https://pytorch.org/get-started/locally/).
 
 ```bash
-git clone https://github.com/DuBianJun-007/GFPC-General-Format-Progressive-Learned-Image-Compression.git  # clone
-cd GFPC-General-Format-Progressive-Learned-Image-Compression
+git clone https://github.com/DuBianJun-007/GLIC-General-Format-Learned-Image-Compression.git  # clone
+cd GLIC-General-Format-Learned-Image-Compression
 pip install -r requirements.txt  # install
 ```
 
@@ -43,9 +43,9 @@ Sample inference test under the specified dataset, the test dataset should be pu
 
 ```bash
 #Defaults to the Kodak dataset
-python Inference_GFPC.py 
+python Inference_GLIC.py 
 #Specify a directory
-python Inference_GFPC.py --dataset XXX
+python Inference_GLIC.py --dataset XXX
 ```
 
 Requirements Package：
@@ -75,9 +75,9 @@ Sample training execution:
 
 ```bash
 #Starting a new training program.
-python train_GFPC.py --lambda 0.09 --batch-size 8 
+python train_GLIC.py --lambda 0.09 --batch-size 8 
 #Continuing training in a checkpoint
-python train_GFPC.py --lambda 0.09 --batch-size 8 --checkpoint XX
+python train_GLIC.py --lambda 0.09 --batch-size 8 --checkpoint XX
 ```
 
 _checkpoint_ directory structure:
@@ -93,7 +93,7 @@ _checkpoint_ directory structure:
 After training is complete, the model needs to be updated:
 
 ```bash
-python updata.py --run XX  # XX is the checkpoint number, e.g. 01
+python updata.py --run XXXX  # XXXX is the checkpoint number, e.g. 1001
 ```
 The updated model is stored in the updataModel folder for the checkpoint.
 
