@@ -281,10 +281,8 @@ class GFPC(CompressionModel):
     def compress(self, x, original_shape):
         y_enc_start = time.time()
         y = self.g_a(x)
-
         y_enc = time.time() - y_enc_start
         B, C, H, W = y.size()  ## The shape of y to generate the mask
-
         z_enc_start = time.time()
         z = self.h_a(y)
         z_enc = time.time() - z_enc_start

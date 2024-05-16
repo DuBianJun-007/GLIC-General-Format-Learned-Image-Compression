@@ -275,7 +275,6 @@ def main():
     if args.cuda and torch.cuda.device_count() > 1:
         print('GPU数量：{}'.format(torch.cuda.device_count()))
         net = CustomDataParallel(net)
-
     optimizer, aux_optimizer = configure_optimizers(net, args)
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100], gamma=0.1)
     criterion = RateDistortionLoss(lmbda=args.lmbda)

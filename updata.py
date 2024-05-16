@@ -70,7 +70,6 @@ def setup_args():
                         help="Path to a run_xx.")
     return parser
 
-
 def main():
     args = setup_args().parse_args()
     run_path = f'checkpoint/run_{args.run}'
