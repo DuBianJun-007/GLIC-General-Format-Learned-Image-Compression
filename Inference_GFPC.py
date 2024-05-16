@@ -168,7 +168,7 @@ def setup_args() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--level",
-        type=bool,
+        type=int,
         default=8,
         help="Level."
     )
