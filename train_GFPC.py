@@ -23,14 +23,14 @@ import torch.optim as optim
 
 from torch.utils.data import DataLoader
 
-from utilis.RateDistortionLoss import RateDistortionLoss
-from utilis.datasets.image import ImageFolder
+from utils.RateDistortionLoss import RateDistortionLoss
+from utils.datasets.image import ImageFolder
 from torch.utils.tensorboard import SummaryWriter
 from PIL import ImageFile
 
-from utilis.optimizers import configure_optimizers
+from utils.optimizers import configure_optimizers
 
-from utilis.util import get_run_count, get_checkpoint_from_runpath, save_checkpoint, log_training_stats, \
+from utils.util import get_run_count, get_checkpoint_from_runpath, save_checkpoint, log_training_stats, \
     AverageMeter, CustomDataParallel
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -151,8 +151,7 @@ def parse_args():
     parser.add_argument(
         "-d", "--dataset",
         type=str,
-        # default='dataset_train',
-        default='dataset_train\imageNet',
+        default='dataset_train',
         help="Training and testing dataset"
     )
     parser.add_argument(
@@ -192,16 +191,16 @@ def parse_args():
         "--lambda",
         dest="lmbda",
         type=float,
-        default=0.015,
+        default=0.015,  # {0.002, 0.0042, 0.0075, 0.015, 0.03, 0.045, 0.07, 0.09}
         help="Bit-rate distortion parameter (default: %(default)s)",
     )
     parser.add_argument(
-        "--batch-size", type=int, default=8, help="Batch size (default: %(default)s)"
+        "--batch-size", type=int, default=16, help="Batch size (default: %(default)s)"
     )
     parser.add_argument(
         "--test-batch-size",
         type=int,
-        default=8,
+        default=16,
         help="Test batch size (default: %(default)s)",
     )
     parser.add_argument(
@@ -232,7 +231,7 @@ def parse_args():
     )
     parser.add_argument('--gpu-id', default='0', type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument("--checkpoint", type=str,
-                        default='1004',
+                        # default='1000',
                         help="Path to a checkpoint. If default=None, start a new training")
     args = parser.parse_args()
     return args
@@ -282,6 +281,7 @@ def main():
     criterion = RateDistortionLoss(lmbda=args.lmbda)
     print("lmbda:" + str(args.lmbda))
     best_loss = float("inf")
+    last_epoch = 0
     if args.checkpoint:  # load from previous checkpoint
         run_path = get_run_count(count=args.checkpoint, new_train=False)
         checkpoint_path = get_checkpoint_from_runpath(run_path)
@@ -289,24 +289,22 @@ def main():
         checkpoint = torch.load(checkpoint_path, map_location=device)
         last_epoch = checkpoint["epoch"] + 1
         net.load_state_dict(checkpoint["state_dict"])
-        # optimizer.load_state_dict(checkpoint["optimizer"])
-        # aux_optimizer.load_state_dict(checkpoint["aux_optimizer"])
-        # lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+        optimizer.load_state_dict(checkpoint["optimizer"])
+        aux_optimizer.load_state_dict(checkpoint["aux_optimizer"])
+        lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
         best_loss = checkpoint["loss"]
     else:  # new train
         run_path = get_run_count(new_train=True)
-    # best_loss = float("inf")
     writer = SummaryWriter(os.path.join(run_path, 'log'))
     noisequant = True
-    level = 4
+    level = 7
     XTrain = 1000
-    last_epoch = 1000
     for epoch in range(last_epoch, args.epochs):
         if epoch > 20:
             noisequant = False
             optimizer.param_groups[0]['lr'] = 1e-5
 
-        if epoch >= XTrain and (epoch - XTrain) % 5000 == 0:  # 训练预览模型,训练方法：每个级别训练500轮，前100轮学习率为1e-4，后400轮学习率为1e-5
+        if epoch >= XTrain and (epoch - XTrain) % XTrain == 0:
             level -= 1
             if level < 0:
                 return
@@ -315,15 +313,12 @@ def main():
             print("Loading best for preview", best_checkpoint_path)
             checkpoint = torch.load(best_checkpoint_path, map_location=device)
             net.load_state_dict(checkpoint["state_dict"])
-            # 冻结模型的所有参数
             optimizer.zero_grad()
             for param in net.parameters():
                 param.requires_grad = False
-            # 开启特定子模块的梯度
             for name, param in net.g_s[level].named_parameters():
                 param.requires_grad = True
             best_loss = float("inf")
-            print('训练预览模块，损失值重置')
         print(
             f'level:{level},checkpoint:{args.checkpoint},CUDA ID:{torch.cuda.current_device()},PATH:{os.path.realpath(sys.argv[0])}')
         print(f"Learning rate: {optimizer.param_groups[0]['lr']} \t level: {level}")

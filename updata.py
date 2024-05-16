@@ -73,61 +73,22 @@ def setup_args():
 
 def main():
     args = setup_args().parse_args()
-
-
-    num = ['1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008']
-    num = ['1005', '1006', '1007', '1008']
-    # num = ['1001', '1002', '1003', '1004']
-    # num = ['1001', '1002']
-    # num = ['1007','1008']
-    # num = ['1002']
-    # num = ['1001']
-    # num = ['1003']
-    num = ['1004', '1005']
-    num = ['1008']
-    num = ['1005']
-
-
-
-
-    for n in num:
-        print(n)
-        run_path = f'checkpoint/run_{n}'
-        filepath = os.path.join(run_path, r'best_checkpoint\checkpoint_best_loss.pth.tar')
-        filepath = Path(filepath)
-        if not filepath.is_file():
-            raise RuntimeError(f'"{filepath}" is not a valid file.')
-        state_dict = load_checkpoint(filepath)
-
-        model_cls = GFPC()
-        net = model_cls.from_state_dict(state_dict)
-
-        if not args.no_update:
-            net.update(force=True)
-        state_dict = net.state_dict()
-
-        save_path = os.path.join(run_path, r'updataModel/updataModel.pth.tar')
-        torch.save(state_dict, save_path)
-
-
-
-
-    # run_path = f'checkpoint/run_{args.run}'
-    # filepath = os.path.join(run_path, r'best_checkpoint\checkpoint_best_loss.pth.tar')
-    # filepath = Path(filepath)
-    # if not filepath.is_file():
-    #     raise RuntimeError(f'"{filepath}" is not a valid file.')
-    # state_dict = load_checkpoint(filepath)
-    #
-    # model_cls = GFPC()
-    # net = model_cls.from_state_dict(state_dict)
-    #
-    # if not args.no_update:
-    #     net.update(force=True)
-    # state_dict = net.state_dict()
-    #
-    # save_path = os.path.join(run_path, r'updataModel/updataModel.pth.tar')
-    # torch.save(state_dict, save_path)
+    run_path = f'checkpoint/run_{args.run}'
+    filepath = os.path.join(run_path, r'best_checkpoint\checkpoint_best_loss.pth.tar')
+    filepath = Path(filepath)
+    if not filepath.is_file():
+        raise RuntimeError(f'"{filepath}" is not a valid file.')
+    state_dict = load_checkpoint(filepath)
+    
+    model_cls = GFPC()
+    net = model_cls.from_state_dict(state_dict)
+    
+    if not args.no_update:
+        net.update(force=True)
+    state_dict = net.state_dict()
+    
+    save_path = os.path.join(run_path, r'updataModel/updataModel.pth.tar')
+    torch.save(state_dict, save_path)
 
 
 if __name__ == "__main__":

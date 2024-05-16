@@ -28,11 +28,6 @@ class GFPC(CompressionModel):
         self.N = int(N)
         self.M = int(M)
         self.num_slices = num_slices
-
-        """
-             N: channel number of main network
-             M: channnel number of latent space
-        """
         self.groups = [0] + [int(M / num_slices)] * num_slices
         self.g_a = nn.Sequential(
             conv(1, N),
@@ -52,22 +47,8 @@ class GFPC(CompressionModel):
             AARB(M),
         )
 
-        # # # 注册一个钩子，捕获 AttentionBlock1 的输出特征图
-        # self.g_a.register_forward_hook(self.capture_attention_output)
-        # self.output_folder = r'./feamap_visual/feautures_AARB_g_a_kodim15'
-
-        # Level：
-        # 0：N=24, M=40
-        # 1：N=48, M=80
-        # 2：N=72, M=120
-        # 3：N=96, M=160
-        # 4：N=120, M=200
-        # 5：N=144, M=240
-        # 6：N=168, M=280
-        # 7：N=192, M=320
         self.g_s = nn.ModuleList()
         for i in range(1, 9):
-            # 根据指定的参数创建模块
             m = i * 40
             n = i * 24
             self.g_s.append(nn.Sequential(
@@ -128,7 +109,7 @@ class GFPC(CompressionModel):
                 nn.ReLU(inplace=True),
                 conv1x1(512, self.groups[i + 1] * 2),
             ) for i in range(num_slices)
-        )  ##from checkboard "Checkerboard Context Model for Efficient Learned Image Compression"" gep网络参数
+        )  ##from paper "Checkerboard Context Model for Efficient Learned Image Compression"" 
 
         self.quantizer = Quantizer()
 
@@ -140,22 +121,7 @@ class GFPC(CompressionModel):
         odd_indices = indices[1::2]
         self.indices = self.even_indices + odd_indices
 
-    # def capture_attention_output(self, module, input, output):
-    #     self.attention_output = output.squeeze(0)
-    #     # 保存特征图为图像文件
-    #     for i in range(self.attention_output.size(0)):
-    #         utils.save_image(self.attention_output[i], os.path.join(self.output_folder, f'{i}.png'))
-
     def forward(self, x, level=7, noisequant=False):
-        # if level != 7:
-        #     for param in self.parameters():  # 关闭所有梯度
-        #         if not param.requires_grad:
-        #             break
-        #         param.requires_grad = False
-        #     for param in self.g_s[level].parameters():  # 开启预览模型梯度
-        #         if param.requires_grad:
-        #             break
-        #         param.requires_grad = True
         y = self.g_a(x)
         B, C, H, W = y.size()
         z = self.h_a(y)
@@ -347,7 +313,7 @@ class GFPC(CompressionModel):
                 support_slices_ch = self.cc_transforms[slice_index - 1](support_slices)
                 support_slices_ch_mean, support_slices_ch_scale = support_slices_ch.chunk(2, 1)
             else:
-                support_slices = torch.concat(y_hat_slices, dim=1)  # 将前面的所有切片全部拼接
+                support_slices = torch.concat(y_hat_slices, dim=1) 
                 support_slices_ch = self.cc_transforms[slice_index - 1](support_slices)
                 support_slices_ch_mean, support_slices_ch_scale = support_slices_ch.chunk(2, 1)
             support = torch.concat([latent_means, latent_scales], dim=1) if slice_index == 0 else torch.concat(
@@ -447,7 +413,7 @@ class GFPC(CompressionModel):
                 support_slices_ch_mean, support_slices_ch_scale = support_slices_ch.chunk(2, 1)
             else:
                 temp_y_hat_slices = [y_hat_slices[i] for i in self.indices[:index]]
-                support_slices = torch.concat(temp_y_hat_slices, dim=1)  # 将前面的所有切片全部拼接
+                support_slices = torch.concat(temp_y_hat_slices, dim=1) 
                 support_slices_ch = self.cc_transforms[slice_index - 1](support_slices)
                 support_slices_ch_mean, support_slices_ch_scale = support_slices_ch.chunk(2, 1)
             support = torch.concat([latent_means, latent_scales], dim=1) if slice_index == 0 else torch.concat(
