@@ -17,7 +17,7 @@ import os
 import math
 import torch.nn as nn
 
-from utilis.datasets.image import read_data_to_numpy, preprocess_image, unflatten_to_nd
+from utils.datasets.image import read_data_to_numpy, preprocess_image, unflatten_to_nd
 from Network_GFPC import GFPC
 
 
@@ -36,7 +36,7 @@ def read_image(filepath: str, mode: str = "auto") -> Tuple[
 
 @torch.no_grad()
 def inference(model, x: torch.Tensor, f: str, output_path: str, patch: int, original_shape: Tuple[int, int, int],
-              preview: bool, mode: str = "auto") -> Dict[str, Any]:
+              level: int = 7, mode: str = "auto") -> Dict[str, Any]:
     f = os.path.normpath(f)
     path_parts = f.split(os.path.sep)
     path_parts[-3] = output_path
@@ -58,7 +58,7 @@ def inference(model, x: torch.Tensor, f: str, output_path: str, patch: int, orig
 
     # Decompression
     start = time.time()
-    out_dec = model.decompress(out_enc["strings"], out_enc["shape"], preview)
+    out_dec = model.decompress(out_enc["strings"], out_enc["shape"], level)
     dec_time = time.time() - start
 
     # Remove Padding
@@ -115,13 +115,13 @@ def calculate_ms_ssim(img1: torch.Tensor, img2: torch.Tensor) -> float:
 
 
 def eval_model(model, file_paths: List[str], output_path: str = 'outputImages', patch: int = 64,
-               preview: bool = False, mode: str = "auto") -> Dict[str, float]:
+               level: int = 7, mode: str = "auto") -> Dict[str, float]:
     device = next(model.parameters()).device
     metrics = defaultdict(float)
     for f in file_paths:
         x, original_shape = read_image(f, mode)
         x = x.to(device)
-        results = inference(model, x, f, output_path, patch, original_shape, preview, mode)
+        results = inference(model, x, f, output_path, patch, original_shape, level, mode)
 
         for k, v in results.items():
             metrics[k] += v
@@ -157,7 +157,7 @@ def setup_args() -> argparse.ArgumentParser:
         "-p", "--path",
         dest="paths",
         type=str,
-        default=r'./model/GFPC-0.0075.pth.tar',
+        default='./model/GFPC-0.0075.pth.tar',
         help="Model path."
     )
     parser.add_argument(
@@ -167,11 +167,10 @@ def setup_args() -> argparse.ArgumentParser:
         help="Padding patch size."
     )
     parser.add_argument(
-        "--preview",
+        "--level",
         type=bool,
-        default=False,
-        # default=True,
-        help="Whether to preview decode."
+        default=8,
+        help="Level."
     )
     parser.add_argument(
         "--mode",
@@ -199,7 +198,7 @@ def main(argv: List[str]) -> None:
         model = model.to("cuda")
 
     results = defaultdict(list)
-    metrics = eval_model(model, filepaths, args.output_path, args.patch, args.preview, args.mode)
+    metrics = eval_model(model, filepaths, args.output_path, args.patch, args.level - 1, args.mode)
 
     for k, v in metrics.items():
         results[k].append(v)
