@@ -11,6 +11,7 @@ import pickle
 
 class ImageFolder(Dataset):
     def __init__(self, root: str, patch_size: Union[int, None] = None, split: str = "train"):
+        
         self.patch_size = patch_size
         splitdir = Path(root) / split
         self.cache_file = Path(root) / f'{split}.cache'
