@@ -1,9 +1,12 @@
+import os
 import time
 
 import torch
 import torch.nn as nn
+from torch import Tensor
+from torchvision import utils
 
-from utilis.layers import (
+from utils.layers import (
     conv3x3,
     CheckboardMaskedConv2d,
     AARB,
@@ -49,33 +52,41 @@ class GFPC(CompressionModel):
             AARB(M),
         )
 
-        self.g_s = nn.Sequential(
-            AARB(M),
-            deconv(M, N),
-            ResidualBottleneckBlock(N),
-            ResidualBottleneckBlock(N),
-            ResidualBottleneckBlock(N),
-            deconv(N, N),
-            AARB(N),
-            ResidualBottleneckBlock(N),
-            ResidualBottleneckBlock(N),
-            ResidualBottleneckBlock(N),
-            deconv(N, N),
-            ResidualBottleneckBlock(N),
-            ResidualBottleneckBlock(N),
-            ResidualBottleneckBlock(N),
-            deconv(N, 1)
-        )
+        # # # 注册一个钩子，捕获 AttentionBlock1 的输出特征图
+        # self.g_a.register_forward_hook(self.capture_attention_output)
+        # self.output_folder = r'./feamap_visual/feautures_AARB_g_a_kodim15'
 
-        self.g_s_preview = nn.Sequential(
-            deconv(M, N),
-            ResidualBottleneckBlock(N),
-            deconv(N, N),
-            ResidualBottleneckBlock(N),
-            deconv(N, N),
-            ResidualBottleneckBlock(N),
-            deconv(N, 1)
-        )
+        # Level：
+        # 0：N=24, M=40
+        # 1：N=48, M=80
+        # 2：N=72, M=120
+        # 3：N=96, M=160
+        # 4：N=120, M=200
+        # 5：N=144, M=240
+        # 6：N=168, M=280
+        # 7：N=192, M=320
+        self.g_s = nn.ModuleList()
+        for i in range(1, 9):
+            # 根据指定的参数创建模块
+            m = i * 40
+            n = i * 24
+            self.g_s.append(nn.Sequential(
+                AARB(m),
+                deconv(m, n),
+                ResidualBottleneckBlock(n),
+                ResidualBottleneckBlock(n),
+                ResidualBottleneckBlock(n),
+                deconv(n, n),
+                AARB(n),
+                ResidualBottleneckBlock(n),
+                ResidualBottleneckBlock(n),
+                ResidualBottleneckBlock(n),
+                deconv(n, n),
+                ResidualBottleneckBlock(n),
+                ResidualBottleneckBlock(n),
+                ResidualBottleneckBlock(n),
+                deconv(n, 1)
+            ))
 
         self.h_a = nn.Sequential(
             conv3x3(M, N),
@@ -129,26 +140,31 @@ class GFPC(CompressionModel):
         odd_indices = indices[1::2]
         self.indices = self.even_indices + odd_indices
 
-    def forward(self, x, train_preview):
-        if train_preview:
-            for param in self.parameters():
-                if not param.requires_grad:
-                    break
-                param.requires_grad = False
-            for param in self.g_s_preview.parameters():
-                if param.requires_grad:
-                    break
-                param.requires_grad = True
-        else:
-            for param in self.parameters():
-                if param.requires_grad:
-                    break
-                param.requires_grad = True
+    # def capture_attention_output(self, module, input, output):
+    #     self.attention_output = output.squeeze(0)
+    #     # 保存特征图为图像文件
+    #     for i in range(self.attention_output.size(0)):
+    #         utils.save_image(self.attention_output[i], os.path.join(self.output_folder, f'{i}.png'))
 
+    def forward(self, x, level=7, noisequant=False):
+        # if level != 7:
+        #     for param in self.parameters():  # 关闭所有梯度
+        #         if not param.requires_grad:
+        #             break
+        #         param.requires_grad = False
+        #     for param in self.g_s[level].parameters():  # 开启预览模型梯度
+        #         if param.requires_grad:
+        #             break
+        #         param.requires_grad = True
         y = self.g_a(x)
         B, C, H, W = y.size()
         z = self.h_a(y)
         z_hat, z_likelihoods = self.entropy_bottleneck(z)
+        if not noisequant:
+            z_offset = self.entropy_bottleneck._get_medians()
+            z_tmp = z - z_offset
+            z_hat = self.ste_round(z_tmp) + z_offset
+
         latent_means, latent_scales = self.h_s(z_hat).chunk(2, 1)
         anchor = torch.zeros_like(y).to(x.device)
         non_anchor = torch.zeros_like(y).to(x.device)
@@ -195,8 +211,12 @@ class GFPC(CompressionModel):
             means_hat_split[:, :, 0::2, 0::2] = means_anchor[:, :, 0::2, 0::2]
             means_hat_split[:, :, 1::2, 1::2] = means_anchor[:, :, 1::2, 1::2]
 
-            y_anchor_quantilized = self.quantizer.quantize(y_anchor, "noise")
-            y_anchor_quantilized_for_gs = self.quantizer.quantize(y_anchor, "ste")
+            if noisequant:
+                y_anchor_quantilized = self.quantizer.quantize(y_anchor, "noise")
+                y_anchor_quantilized_for_gs = self.quantizer.quantize(y_anchor, "ste")
+            else:
+                y_anchor_quantilized = self.quantizer.quantize(y_anchor - means_anchor, "ste") + means_anchor
+                y_anchor_quantilized_for_gs = self.quantizer.quantize(y_anchor - means_anchor, "ste") + means_anchor
 
             y_anchor_quantilized[:, :, 0::2, 1::2] = 0
             y_anchor_quantilized[:, :, 1::2, 0::2] = 0
@@ -218,8 +238,14 @@ class GFPC(CompressionModel):
 
             y_non_anchor = non_anchor_split[slice_index]
 
-            y_non_anchor_quantilized = self.quantizer.quantize(y_non_anchor, "noise")
-            y_non_anchor_quantilized_for_gs = self.quantizer.quantize(y_non_anchor, "ste")
+            if noisequant:
+                y_non_anchor_quantilized = self.quantizer.quantize(y_non_anchor, "noise")
+                y_non_anchor_quantilized_for_gs = self.quantizer.quantize(y_non_anchor, "ste")
+            else:
+                y_non_anchor_quantilized = self.quantizer.quantize(y_non_anchor - means_non_anchor,
+                                                                   "ste") + means_non_anchor
+                y_non_anchor_quantilized_for_gs = self.quantizer.quantize(y_non_anchor - means_non_anchor,
+                                                                          "ste") + means_non_anchor
 
             y_non_anchor_quantilized[:, :, 0::2, 0::2] = 0
             y_non_anchor_quantilized[:, :, 1::2, 1::2] = 0
@@ -233,26 +259,35 @@ class GFPC(CompressionModel):
             y_likelihood[slice_index] = y_slice_likelihood
             y_hat_slices.append(y_hat_slice)
 
-            if train_preview and slice_index == self.indices[int(len(self.indices) / 2) - 1]:  # 奇数部分计算完成
+            if len(y_hat_slices) - 1 == level:
                 break
-
-        if train_preview:
-            y_likelihoods = torch.cat(y_likelihood[::2], dim=1)
-            tensor_elements = y_hat_slices_for_gs[::2]
-            mean_tensor = sum(tensor_elements) / len(tensor_elements)
-            for i in range(1, len(self.indices), 2):
-                y_hat_slices_for_gs[i] = mean_tensor.clone()
-            y_hat_preview_image = torch.cat(y_hat_slices_for_gs, dim=1)
-            x_hat = self.g_s_preview(y_hat_preview_image)
-        else:
-            y_likelihoods = torch.cat(y_likelihood, dim=1)
-            y_hat = torch.cat(y_hat_slices_for_gs, dim=1)
-            x_hat = self.g_s(y_hat)
+        if level != 7:
+            y_likelihood = [likelihood for likelihood in y_likelihood if likelihood is not None]
+            y_hat_slices_for_gs = [slices for slices in y_hat_slices_for_gs if slices is not None]
+        y_likelihoods = torch.cat(y_likelihood, dim=1)
+        y_hat = torch.cat(y_hat_slices_for_gs, dim=1)
+        x_hat = self.g_s[level](y_hat)
 
         return {
             "x_hat": x_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
+
+    def ste_round(self, x: Tensor) -> Tensor:
+        """
+        Rounding with non-zero gradients. Gradients are approximated by replacing
+        the derivative by the identity function.
+
+        Used in `"Lossy Image Compression with Compressive Autoencoders"
+        <https://arxiv.org/abs/1703.00395>`_
+
+        .. note::
+
+            Implemented with the pytorch `detach()` reparametrization trick:
+
+            `x_round = x_round - x.detach() + x`
+        """
+        return torch.round(x) - x.detach() + x
 
     def load_state_dict(self, state_dict):
         update_registered_buffers(
@@ -386,7 +421,7 @@ class GFPC(CompressionModel):
                 'original_shape': original_shape,
                 "time": {'y_enc': y_enc, "z_enc": z_enc, "z_dec": z_dec, "params": params_time}}
 
-    def decompress(self, strings, shape, preview=False):
+    def decompress(self, strings, shape, level=7):
         assert isinstance(strings, list) and len(strings) == 2
 
         z_hat = self.entropy_bottleneck.decompress(strings[1], shape)
@@ -466,16 +501,12 @@ class GFPC(CompressionModel):
             y_slice_hat = y_anchor_decode + y_non_anchor_quantized
             y_hat_slices[slice_index] = y_slice_hat
 
-            if preview and index == (len(self.groups) // 2 - 1):  # Mean filling
-                tensor_elements = y_hat_slices[::2]
-                mean_tensor = sum(tensor_elements) / len(tensor_elements)
-                y_hat_previer = [mean_tensor.clone() if i % 2 else ele for i, ele in enumerate(y_hat_slices)]
-                y_hat_preview_image = torch.cat(y_hat_previer, dim=1)
-                preview_x_hat = self.g_s_preview(y_hat_preview_image)
-                return {"x_hat": preview_x_hat, "time": {"y_dec": time.time() - y_dec_start}}
-
+            if index == level:
+                break
+        if level != 7:
+            y_hat_slices = [slices for slices in y_hat_slices if slices is not None]
         y_hat = torch.cat(y_hat_slices, dim=1)
         y_dec_start = time.time()
-        x_hat = self.g_s(y_hat).clamp_(0, 1)
+        x_hat = self.g_s[level](y_hat).clamp_(0, 1)
         y_dec = time.time() - y_dec_start
         return {"x_hat": x_hat, "time": {"y_dec": y_dec}}

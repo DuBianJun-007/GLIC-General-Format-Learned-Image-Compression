@@ -15,6 +15,7 @@
 import argparse
 import random
 import os
+import sys
 import time
 
 import torch
@@ -39,7 +40,7 @@ from Network_GFPC import GFPC
 
 def train_one_epoch(
         model, criterion, train_dataloader, optimizer, aux_optimizer, epoch, clip_max_norm, writer=None,
-        train_preview=False
+        level=7, noisequant=False
 ):
     model.train()
     device = next(model.parameters()).device
@@ -54,7 +55,7 @@ def train_one_epoch(
 
         optimizer.zero_grad()
         aux_optimizer.zero_grad()
-        out_net = model(d, train_preview)
+        out_net = model(d, level, noisequant)
 
         out_criterion = criterion(out_net, d)
         train_bpp_loss.update(out_criterion["bpp_loss"].item())
@@ -68,7 +69,7 @@ def train_one_epoch(
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_max_norm)
         optimizer.step()
 
-        if not train_preview:
+        if level == 7:
             aux_loss = model.aux_loss()
             aux_loss.backward()
             aux_optimizer.step()
@@ -107,7 +108,7 @@ def train_one_epoch(
     return train_loss.avg, train_bpp_loss.avg, train_mse_loss.avg
 
 
-def test_epoch(epoch, test_dataloader, model, criterion, train_preview):
+def test_epoch(epoch, test_dataloader, model, criterion, level):
     model.eval()
     device = next(model.parameters()).device
 
@@ -121,7 +122,7 @@ def test_epoch(epoch, test_dataloader, model, criterion, train_preview):
     with torch.no_grad():
         for d in test_dataloader:
             d = d.to(device)
-            out_net = model(d, train_preview)
+            out_net = model(d, level)
             out_criterion = criterion(out_net, d)
 
             aux_loss.update(model.aux_loss().item())
@@ -150,7 +151,8 @@ def parse_args():
     parser.add_argument(
         "-d", "--dataset",
         type=str,
-        default='dataset_train',
+        # default='dataset_train',
+        default='dataset_train\imageNet',
         help="Training and testing dataset"
     )
     parser.add_argument(
@@ -168,7 +170,7 @@ def parse_args():
     parser.add_argument(
         "-e",
         "--epochs",
-        default=1000,
+        default=4500,
         type=int,
         help="Number of epochs (default: %(default)s)",
     )
@@ -190,7 +192,7 @@ def parse_args():
         "--lambda",
         dest="lmbda",
         type=float,
-        default=0.09,
+        default=0.015,
         help="Bit-rate distortion parameter (default: %(default)s)",
     )
     parser.add_argument(
@@ -230,7 +232,7 @@ def parse_args():
     )
     parser.add_argument('--gpu-id', default='0', type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
     parser.add_argument("--checkpoint", type=str,
-                        # default='01',
+                        default='1004',
                         help="Path to a checkpoint. If default=None, start a new training")
     args = parser.parse_args()
     return args
@@ -279,7 +281,7 @@ def main():
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100], gamma=0.1)
     criterion = RateDistortionLoss(lmbda=args.lmbda)
     print("lmbda:" + str(args.lmbda))
-    last_epoch = 0
+    best_loss = float("inf")
     if args.checkpoint:  # load from previous checkpoint
         run_path = get_run_count(count=args.checkpoint, new_train=False)
         checkpoint_path = get_checkpoint_from_runpath(run_path)
@@ -287,30 +289,44 @@ def main():
         checkpoint = torch.load(checkpoint_path, map_location=device)
         last_epoch = checkpoint["epoch"] + 1
         net.load_state_dict(checkpoint["state_dict"])
-        optimizer.load_state_dict(checkpoint["optimizer"])
-        aux_optimizer.load_state_dict(checkpoint["aux_optimizer"])
-        lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+        # optimizer.load_state_dict(checkpoint["optimizer"])
+        # aux_optimizer.load_state_dict(checkpoint["aux_optimizer"])
+        # lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+        best_loss = checkpoint["loss"]
     else:  # new train
         run_path = get_run_count(new_train=True)
-
+    # best_loss = float("inf")
     writer = SummaryWriter(os.path.join(run_path, 'log'))
-
-    train_preview = False
-    best_loss = float("inf")
+    noisequant = True
+    level = 4
+    XTrain = 1000
+    last_epoch = 1000
     for epoch in range(last_epoch, args.epochs):
-        if epoch > 100:
+        if epoch > 20:
+            noisequant = False
             optimizer.param_groups[0]['lr'] = 1e-5
-        if epoch > 400 and not train_preview:
-            optimizer.param_groups[0]['lr'] = 1e-4
+
+        if epoch >= XTrain and (epoch - XTrain) % 5000 == 0:  # 训练预览模型,训练方法：每个级别训练500轮，前100轮学习率为1e-4，后400轮学习率为1e-5
+            level -= 1
+            if level < 0:
+                return
+            print(f"Epoch {epoch}: Decreasing level to {level}")
             best_checkpoint_path = os.path.join(run_path, 'best_checkpoint/checkpoint_best_loss.pth.tar')
             print("Loading best for preview", best_checkpoint_path)
             checkpoint = torch.load(best_checkpoint_path, map_location=device)
             net.load_state_dict(checkpoint["state_dict"])
+            # 冻结模型的所有参数
+            optimizer.zero_grad()
+            for param in net.parameters():
+                param.requires_grad = False
+            # 开启特定子模块的梯度
+            for name, param in net.g_s[level].named_parameters():
+                param.requires_grad = True
             best_loss = float("inf")
-            train_preview = True
-        if epoch > 500:
-            optimizer.param_groups[0]['lr'] = 1e-5
-        print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
+            print('训练预览模块，损失值重置')
+        print(
+            f'level:{level},checkpoint:{args.checkpoint},CUDA ID:{torch.cuda.current_device()},PATH:{os.path.realpath(sys.argv[0])}')
+        print(f"Learning rate: {optimizer.param_groups[0]['lr']} \t level: {level}")
         train_loss, train_bpp, train_mse = train_one_epoch(
             net,
             criterion,
@@ -320,13 +336,14 @@ def main():
             epoch,
             args.clip_max_norm,
             writer,
-            train_preview
+            level,
+            noisequant
         )
         writer.add_scalar('Train/loss', train_loss, epoch)
         writer.add_scalar('Train/mse', train_mse, epoch)
         writer.add_scalar('Train/bpp', train_bpp, epoch)
 
-        loss, bpp, mse = test_epoch(epoch, test_dataloader, net, criterion, train_preview)
+        loss, bpp, mse = test_epoch(epoch, test_dataloader, net, criterion, level)
         writer.add_scalar('Test/loss', loss, epoch)
         writer.add_scalar('Test/mse', mse, epoch)
         writer.add_scalar('Test/bpp', bpp, epoch)
@@ -343,7 +360,7 @@ def main():
                     "loss": loss,
                     "optimizer": optimizer.state_dict(),
                     "aux_optimizer": aux_optimizer.state_dict(),
-                    "lr_scheduler": lr_scheduler.state_dict()
+                    "lr_scheduler": lr_scheduler.state_dict(),
                 },
                 is_best=is_best,
                 run_path=run_path,
