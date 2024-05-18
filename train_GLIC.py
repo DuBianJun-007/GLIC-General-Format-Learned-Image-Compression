@@ -34,7 +34,7 @@ from utils.util import get_run_count, get_checkpoint_from_runpath, save_checkpoi
     AverageMeter, CustomDataParallel
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-from Network_GFPC import GFPC
+from Network_GLIC import GFPC
 
 
 

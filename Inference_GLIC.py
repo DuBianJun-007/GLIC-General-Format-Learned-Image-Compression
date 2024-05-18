@@ -18,7 +18,7 @@ import math
 import torch.nn as nn
 
 from utils.datasets.image import read_data_to_numpy, preprocess_image, unflatten_to_nd
-from Network_GFPC import GFPC
+from Network_GLIC import GFPC
 
 
 def psnr(a: torch.Tensor, b: torch.Tensor) -> float:

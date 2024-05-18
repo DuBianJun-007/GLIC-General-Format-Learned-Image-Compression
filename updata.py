@@ -8,7 +8,7 @@ import os
 import torch
 from torch import Tensor
 
-from Network_GFPC import GFPC
+from Network_GLIC import GFPC
 
 
 def rename_key(key: str) -> str:
