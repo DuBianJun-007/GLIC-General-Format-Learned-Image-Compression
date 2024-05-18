@@ -37,8 +37,26 @@ Downloaded model, put into mod folder
 | 0.002  | [0.002](https://drive.google.com/file/d/1qH6d5Bf5XhzTvr_eooE08jrPJK2SKl1g/view?usp=sharing) |
 
 <details open>
+
+<summary>Data download</summary>
+
+Download training data and validation data
+
+| Training data | [ImageNet](https://drive.google.com/file/d/15_YBkQAnToRJ9xEOnK3FoqotHgoTvf6j/view?usp=sharing) |
+|---------------|------------------------------------------------------------------------------------------------|
+
+
+| Validation data | Link                                                                                        |
+|-----------------|---------------------------------------------------------------------------------------------|
+| Kodak           | [Kodak](https://drive.google.com/file/d/1Zg8ZpQNIzYBKTlwEFU8Fxbwsz-2cn7Oh/view?usp=sharing)                                                                                   |
+| CLIC 2020 professional            | [CLIC 2020 professional](https://drive.google.com/file/d/1nrNUdEfg1elTq6dmMRnSPVtwtwnzlRAk/view?usp=sharing)                                                                                   |
+
+
+<details open>
 <summary>Inference</summary>
 
+
+<summary>Inference</summary>
 Sample inference test under the specified dataset, the test dataset should be put to the _dataset_val_ file:
 
 ```bash
@@ -75,9 +93,9 @@ Sample training execution:
 
 ```bash
 #Starting a new training program.
-python train_GLIC.py --lambda 0.09 --batch-size 8 
+python train_GLIC.py --lambda 0.09 --batch-size 16 
 #Continuing training in a checkpoint
-python train_GLIC.py --lambda 0.09 --batch-size 8 --checkpoint XX
+python train_GLIC.py --lambda 0.09 --batch-size 16 --checkpoint XX
 ```
 
 _checkpoint_ directory structure:
