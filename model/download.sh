@@ -1,26 +1,28 @@
 #!/bin/bash
 
-# Define file links
-file_links=(
-    "https://drive.google.com/uc?export=download&id=1vGWt-qF_DEKKhi-mtSpO7S_zkUCXUBvQ"
-    "https://drive.google.com/uc?export=download&id=1F250henyzJ4CHo_lLmbNL1pi44MvLeYI"
-    "https://drive.google.com/uc?export=download&id=1-IsjdzaQYWhcuP1ZfCiHX0Sw5uILIBf9"
-    "https://drive.google.com/uc?export=download&id=1hQIzHrTZUXazDdw8uraAoaJfLyOYUpk8"
-    "https://drive.google.com/uc?export=download&id=1JKwX9YvmSaZ68V0c-fzGn2NQ0ovRo-ld"
-    "https://drive.google.com/uc?export=download&id=1Ks4DwXiU3vAZ6DE6VeIy_2BpIP_7Qqs9"
-    "https://drive.google.com/uc?export=download&id=1QGBgZaCwVqUVcKp0R8vSlG62ir13bbIJ"
-    "https://drive.google.com/uc?export=download&id=11wwxVzyMjCH2GgFg4LavoJbp3YiQO_dr"
+# 下载文件函数
+download_file() {
+    local url=$1
+    local file_id=$(echo $url | grep -o 'd/[^/]*' | cut -d'/' -f2)
+    local file_name=$(curl -s -L "https://drive.google.com/uc?export=download&id=${file_id}" | grep -o 'filename="[^"]*"' | cut -d'"' -f2)
+    wget --no-check-certificate "https://drive.google.com/uc?export=download&id=${file_id}" -O "${file_name}"
+}
+
+# 文件链接列表
+urls=(
+    "https://drive.google.com/file/d/1ca7J--RN_AdTdvquFGGW8qYVzaHXYp_5/view?usp=sharing"
+    "https://drive.google.com/file/d/1d9cZDyBPSOUq3qM0MNMLZuJ_YdRtn5Kl/view?usp=sharing"
+    "https://drive.google.com/file/d/1a3JJTKnKWNuw4ALChigETyDRc51Hlph0/view?usp=sharing"
+    "https://drive.google.com/file/d/1rDQIKeRlpC1Eyd_V1rF5PpGxXVzXHklX/view?usp=sharing"
+    "https://drive.google.com/file/d/1PRY_yD4z0ct6GZBVsxABHRYy6kkSPlhZ/view?usp=sharing"
+    "https://drive.google.com/file/d/1HEH38IWdVj5UTsIe6u1z-BijpormlRxK/view?usp=sharing"
+    "https://drive.google.com/file/d/1mWJlk-p0Ii3IzCfRwVvfWaWPLtTNHdZi/view?usp=sharing"
+    "https://drive.google.com/file/d/1qH6d5Bf5XhzTvr_eooE08jrPJK2SKl1g/view?usp=sharing"
 )
 
-# Loop through file links and download files with default names
-for file_link in "${file_links[@]}"; do
-    # Use wget to download the file (you can use curl as well)
-    wget "$file_link"
-
-    # Check if the download was successful
-    if [ $? -eq 0 ]; then
-        echo "Download successful: $file_link"
-    else
-        echo "Download failed: $file_link"
-    fi
+# 循环下载每个文件
+for url in "${urls[@]}"; do
+    download_file "$url"
 done
+
+echo "所有文件下载完成！"

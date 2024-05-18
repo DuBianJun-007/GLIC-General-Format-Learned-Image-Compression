@@ -25,16 +25,16 @@ pip install -r requirements.txt  # install
 
 Downloaded model, put into mod folder
 
-| lambda | Link                                                                                         |
-|--------|----------------------------------------------------------------------------------------------|
-| 0.09   | [0.09](https://drive.google.com/file/d/1vGWt-qF_DEKKhi-mtSpO7S_zkUCXUBvQ/view?usp=sharing)   |
-| 0.07   | [0.07](https://drive.google.com/file/d/1F250henyzJ4CHo_lLmbNL1pi44MvLeYI/view?usp=sharing)   |
-| 0.045  | [0.045](https://drive.google.com/file/d/1-IsjdzaQYWhcuP1ZfCiHX0Sw5uILIBf9/view?usp=sharing)  |
-| 0.03   | [0.03](https://drive.google.com/file/d/1hQIzHrTZUXazDdw8uraAoaJfLyOYUpk8/view?usp=sharing)   |
-| 0.015  | [0.015](https://drive.google.com/file/d/1JKwX9YvmSaZ68V0c-fzGn2NQ0ovRo-ld/view?usp=sharing)  |
-| 0.0075 | [0.0075](https://drive.google.com/file/d/1Ks4DwXiU3vAZ6DE6VeIy_2BpIP_7Qqs9/view?usp=sharing) |
-| 0.0038 | [0.0038](https://drive.google.com/file/d/1QGBgZaCwVqUVcKp0R8vSlG62ir13bbIJ/view?usp=sharing) |
-| 0.002  | [0.002](https://drive.google.com/file/d/11wwxVzyMjCH2GgFg4LavoJbp3YiQO_dr/view?usp=sharing)  |
+| lambda | Link                                                                                        |
+|--------|---------------------------------------------------------------------------------------------|
+| 0.09   | [0.09](https://drive.google.com/file/d/1ca7J--RN_AdTdvquFGGW8qYVzaHXYp_5/view?usp=sharing)                                                                                    |
+| 0.07   | [0.07](https://drive.google.com/file/d/1d9cZDyBPSOUq3qM0MNMLZuJ_YdRtn5Kl/view?usp=sharing)                                                                                    |
+| 0.045  | [0.045](https://drive.google.com/file/d/1a3JJTKnKWNuw4ALChigETyDRc51Hlph0/view?usp=sharing)                                                                                   |
+| 0.03   | [0.03](https://drive.google.com/file/d/1rDQIKeRlpC1Eyd_V1rF5PpGxXVzXHklX/view?usp=sharing)                                                                                    |
+| 0.015  | [0.015](https://drive.google.com/file/d/1PRY_yD4z0ct6GZBVsxABHRYy6kkSPlhZ/view?usp=sharing)                                                                                   |
+| 0.0075 | [0.0075](https://drive.google.com/file/d/1HEH38IWdVj5UTsIe6u1z-BijpormlRxK/view?usp=sharing)                                                                                  |
+| 0.0042 | [0.0042](https://drive.google.com/file/d/1mWJlk-p0Ii3IzCfRwVvfWaWPLtTNHdZi/view?usp=sharing)                                                                                  |
+| 0.002  | [0.002](https://drive.google.com/file/d/1qH6d5Bf5XhzTvr_eooE08jrPJK2SKl1g/view?usp=sharing) |
 
 <details open>
 <summary>Inference</summary>
