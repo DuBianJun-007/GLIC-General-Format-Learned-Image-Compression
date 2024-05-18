@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# 下载文件函数
 download_file() {
     local url=$1
     local file_id=$(echo $url | grep -o 'd/[^/]*' | cut -d'/' -f2)
@@ -8,7 +7,6 @@ download_file() {
     wget --no-check-certificate "https://drive.google.com/uc?export=download&id=${file_id}" -O "${file_name}"
 }
 
-# 文件链接列表
 urls=(
     "https://drive.google.com/file/d/1ca7J--RN_AdTdvquFGGW8qYVzaHXYp_5/view?usp=sharing"
     "https://drive.google.com/file/d/1d9cZDyBPSOUq3qM0MNMLZuJ_YdRtn5Kl/view?usp=sharing"
@@ -20,9 +18,8 @@ urls=(
     "https://drive.google.com/file/d/1qH6d5Bf5XhzTvr_eooE08jrPJK2SKl1g/view?usp=sharing"
 )
 
-# 循环下载每个文件
 for url in "${urls[@]}"; do
     download_file "$url"
 done
 
-echo "所有文件下载完成！"
+echo "finish！"
