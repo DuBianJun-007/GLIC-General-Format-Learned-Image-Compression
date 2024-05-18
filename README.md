@@ -44,8 +44,8 @@ Download training data and validation data
 
 | Training data | [ImageNet](https://drive.google.com/file/d/15z_5x5m3hG2CzEI5mGz8Nw3JA2KHBNIh/view?usp=sharing) |
 |---------------|------------------------------------------------------------------------------------------------|
-Data preparation: ImageNet with the following folder structure.
 
+Data preparation: ImageNet with the following folder structure.
 ```
 │imageNet/
 ├──train/
