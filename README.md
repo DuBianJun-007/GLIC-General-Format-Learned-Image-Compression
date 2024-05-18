@@ -46,10 +46,10 @@ Download training data and validation data
 |---------------|------------------------------------------------------------------------------------------------|
 
 
-| Validation data | Link                                                                                        |
-|-----------------|---------------------------------------------------------------------------------------------|
-| Kodak           | [Kodak](https://drive.google.com/file/d/1Zg8ZpQNIzYBKTlwEFU8Fxbwsz-2cn7Oh/view?usp=sharing)                                                                                   |
-| CLIC 2020 professional            | [CLIC 2020 professional](https://drive.google.com/file/d/1nrNUdEfg1elTq6dmMRnSPVtwtwnzlRAk/view?usp=sharing)                                                                                   |
+| Validation data         | Link                                                                                        |
+|-------------------------|---------------------------------------------------------------------------------------------|
+| Kodak                   | [Kodak](https://drive.google.com/file/d/1Zg8ZpQNIzYBKTlwEFU8Fxbwsz-2cn7Oh/view?usp=sharing)                                                                                   |
+| CLIC 2020 professional  | [CLIC 2020 professional](https://drive.google.com/file/d/1nrNUdEfg1elTq6dmMRnSPVtwtwnzlRAk/view?usp=sharing)                                                                                   |
 
 
 <details open>
