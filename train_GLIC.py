@@ -151,7 +151,7 @@ def parse_args():
     parser.add_argument(
         "-d", "--dataset",
         type=str,
-        default='dataset_train',
+        default='dataset_train/ImageNet',
         help="Training and testing dataset"
     )
     parser.add_argument(
@@ -169,7 +169,7 @@ def parse_args():
     parser.add_argument(
         "-e",
         "--epochs",
-        default=4500,
+        default=9000,
         type=int,
         help="Number of epochs (default: %(default)s)",
     )
@@ -271,10 +271,6 @@ def main():
     net = GLIC(N=args.N, M=args.M)
     net = net.to(device)
 
-    #For multi-GPU training
-    if args.cuda and torch.cuda.device_count() > 1:
-        print('GPU数量：{}'.format(torch.cuda.device_count()))
-        net = CustomDataParallel(net)
     optimizer, aux_optimizer = configure_optimizers(net, args)
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100], gamma=0.1)
     criterion = RateDistortionLoss(lmbda=args.lmbda)
@@ -288,9 +284,6 @@ def main():
         checkpoint = torch.load(checkpoint_path, map_location=device)
         last_epoch = checkpoint["epoch"] + 1
         net.load_state_dict(checkpoint["state_dict"])
-        optimizer.load_state_dict(checkpoint["optimizer"])
-        aux_optimizer.load_state_dict(checkpoint["aux_optimizer"])
-        lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
         best_loss = checkpoint["loss"]
     else:  # new train
         run_path = get_run_count(new_train=True)
@@ -351,10 +344,7 @@ def main():
                 state={
                     "epoch": epoch,
                     "state_dict": net.state_dict(),
-                    "loss": loss,
-                    "optimizer": optimizer.state_dict(),
-                    "aux_optimizer": aux_optimizer.state_dict(),
-                    "lr_scheduler": lr_scheduler.state_dict(),
+                    "loss": loss
                 },
                 is_best=is_best,
                 run_path=run_path,

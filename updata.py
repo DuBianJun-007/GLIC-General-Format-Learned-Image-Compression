@@ -8,7 +8,7 @@ import os
 import torch
 from torch import Tensor
 
-from Network_GLIC import GFPC
+from Network_GLIC import GLIC
 
 
 def rename_key(key: str) -> str:
@@ -79,7 +79,7 @@ def main():
         raise RuntimeError(f'"{filepath}" is not a valid file.')
     state_dict = load_checkpoint(filepath)
     
-    model_cls = GFPC()
+    model_cls = GLIC()
     net = model_cls.from_state_dict(state_dict)
     
     if not args.no_update:
