@@ -34,7 +34,7 @@ from utils.util import get_run_count, get_checkpoint_from_runpath, save_checkpoi
     AverageMeter, CustomDataParallel
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-from Network_GLIC import GFPC
+from Network_GLIC import GLIC
 
 
 
@@ -268,7 +268,7 @@ def main():
         pin_memory=(device == "cuda"),
     )
 
-    net = GFPC(N=args.N, M=args.M)
+    net = GLIC(N=args.N, M=args.M)
     net = net.to(device)
 
     #For multi-GPU training

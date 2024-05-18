@@ -18,7 +18,7 @@ import math
 import torch.nn as nn
 
 from utils.datasets.image import read_data_to_numpy, preprocess_image, unflatten_to_nd
-from Network_GLIC import GFPC
+from Network_GLIC import GLIC
 
 
 def psnr(a: torch.Tensor, b: torch.Tensor) -> float:
@@ -157,7 +157,7 @@ def setup_args() -> argparse.ArgumentParser:
         "-p", "--path",
         dest="paths",
         type=str,
-        default='./model/GFPC-0.0075.pth.tar',
+        default='./model/GLIC-0.0075.pth.tar',
         help="Model path."
     )
     parser.add_argument(
@@ -193,7 +193,7 @@ def main(argv: List[str]) -> None:
     compressai.set_entropy_coder(args.entropy_coder)
     state_dict = load_state_dict(torch.load(args.paths))
 
-    model = GFPC().from_state_dict(state_dict).eval()
+    model = GLIC().from_state_dict(state_dict).eval()
     if torch.cuda.is_available():
         model = model.to("cuda")
 

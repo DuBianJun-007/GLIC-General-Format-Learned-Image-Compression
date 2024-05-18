@@ -21,7 +21,7 @@ from compressai.models.utils import conv, deconv, update_registered_buffers
 from compressai.models.priors import CompressionModel
 
 
-class GFPC(CompressionModel):
+class GLIC(CompressionModel):
 
     def __init__(self, N=192, M=320, num_slices=8):
         super().__init__(entropy_bottleneck_channels=N)
