@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# 下载文件函数
 download_file() {
     local url=$1
     local file_id=$(echo $url | grep -o 'd/[^/]*' | cut -d'/' -f2)
@@ -10,10 +9,8 @@ download_file() {
     rm -rf /tmp/gcookie
 }
 
-# 文件链接
 url="https://drive.google.com/file/d/15_YBkQAnToRJ9xEOnK3FoqotHgoTvf6j/view?usp=sharing"
 
-# 下载文件
 download_file "$url"
 
-echo "文件下载完成！"
+echo "finish！"

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# 下载文件函数
 download_file() {
     local url=$1
     local file_id=$(echo $url | grep -o 'd/[^/]*' | cut -d'/' -f2)
@@ -10,13 +9,11 @@ download_file() {
     rm -rf /tmp/gcookie
 }
 
-# 文件链接列表
 urls=(
     "https://drive.google.com/file/d/1Zg8ZpQNIzYBKTlwEFU8Fxbwsz-2cn7Oh/view?usp=sharing"
     "https://drive.google.com/file/d/1nrNUdEfg1elTq6dmMRnSPVtwtwnzlRAk/view?usp=sharing"
 )
 
-# 循环下载每个文件
 for url in "${urls[@]}"; do
     download_file "$url"
 done
