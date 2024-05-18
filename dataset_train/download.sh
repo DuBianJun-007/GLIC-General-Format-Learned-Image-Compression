@@ -9,7 +9,7 @@ download_file() {
     rm -rf /tmp/gcookie
 }
 
-url="https://drive.google.com/file/d/15_YBkQAnToRJ9xEOnK3FoqotHgoTvf6j/view?usp=sharing"
+url="https://drive.google.com/file/d/15z_5x5m3hG2CzEI5mGz8Nw3JA2KHBNIh/view?usp=sharing"
 
 download_file "$url"
 

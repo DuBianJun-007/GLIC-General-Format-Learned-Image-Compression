@@ -42,9 +42,21 @@ Downloaded model, put into mod folder
 
 Download training data and validation data
 
-| Training data | [ImageNet](https://drive.google.com/file/d/15_YBkQAnToRJ9xEOnK3FoqotHgoTvf6j/view?usp=sharing) |
+| Training data | [ImageNet](https://drive.google.com/file/d/15z_5x5m3hG2CzEI5mGz8Nw3JA2KHBNIh/view?usp=sharing) |
 |---------------|------------------------------------------------------------------------------------------------|
+Data preparation: ImageNet with the following folder structure.
 
+```
+│imageNet/
+├──train/
+│  ├── ILSVRC2016_test_00000001.JPEG
+│  ├── ILSVRC2016_test_00000002.JPEG
+│  ├── ......
+├──test/
+│  ├── ILSVRC2012_val_00000001.jpg
+│  ├── ILSVRC2012_val_00000007.jpg
+│  ├── ......
+```
 
 | Validation data         | Link                                                                                        |
 |-------------------------|---------------------------------------------------------------------------------------------|
