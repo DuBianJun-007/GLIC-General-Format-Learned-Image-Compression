@@ -54,9 +54,6 @@ Download training data and validation data
 
 <details open>
 <summary>Inference</summary>
-
-
-<summary>Inference</summary>
 Sample inference test under the specified dataset, the test dataset should be put to the _dataset_val_ file:
 
 ```bash
