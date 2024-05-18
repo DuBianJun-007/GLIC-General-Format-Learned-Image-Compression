@@ -49,12 +49,10 @@ Data preparation: ImageNet with the following folder structure.
 ```
 │imageNet/
 ├──train/
-│  ├── ILSVRC2016_test_00000001.JPEG
-│  ├── ILSVRC2016_test_00000002.JPEG
+│  ├── ILSVRC2016_********.JPEG
 │  ├── ......
 ├──test/
-│  ├── ILSVRC2012_val_00000001.jpg
-│  ├── ILSVRC2012_val_00000007.jpg
+│  ├── ILSVRC2012_********.jpg
 │  ├── ......
 ```
 
