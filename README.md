@@ -122,7 +122,7 @@ python updata.py --run XXXX  # XXXX is the checkpoint number, e.g. 1001
 ```
 The updated model is stored in the updataModel folder for the checkpoint.
 
-Some experimental results:
+Some experimental results of paper submission:
 <div style="display: flex;">
     <div style="flex: 1; margin: 5px;">
         <img src="PSNR-BPP-Kodak.png" alt="Image 1" style="max-width: 100%; height: auto;">
@@ -132,6 +132,14 @@ Some experimental results:
     </div>
 </div>
 
-
+After we optimized the training process in recent time (without changing the model structure), our model achieved better performance, later we will release our model weights file:
+<div style="display: flex;">
+    <div style="flex: 1; margin: 5px;">
+        <img src="PSNR-BPP-Kodak-new.png" alt="Image 1" style="max-width: 100%; height: auto;">
+    </div>
+    <div style="flex: 1; margin: 5px;">
+        <img src="MSSSIM-BPP-Kodak-new.png" alt="Image 2" style="max-width: 100%; height: auto;">
+    </div>
+</div>
 
 </details>
