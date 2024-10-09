@@ -1,3 +1,4 @@
+*
 /model/GLIC_1_0.002.pth.tar
 /model/GLIC_2_0.0042.pth.tar
 /model/GLIC_3_0.0075.pth.tar
@@ -8,3 +9,4 @@
 /model/GLIC_8_0.09.pth.tar
 /dataset_val/CLIC 2020 professional 250/
 /dataset_val/Kodak/
+!README.md
