@@ -157,7 +157,8 @@ def setup_args() -> argparse.ArgumentParser:
         "-p", "--path",
         dest="paths",
         type=str,
-        default='model/GLIC_8_0.09.pth.tar',
+        # default='model/GLIC_8_0.09.pth.tar',
+        default='model/GLIC_7_0.07.pth.tar',
         help="Model path."
     )
     parser.add_argument(
