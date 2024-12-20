@@ -23,7 +23,7 @@ pip install -r requirements.txt  # install
 <details open>
 <summary>Model download</summary>
 
-Downloaded model, put into mod folder
+Downloaded model, put into model folder
 
 | lambda | Link                                                                                        |
 |--------|---------------------------------------------------------------------------------------------|
