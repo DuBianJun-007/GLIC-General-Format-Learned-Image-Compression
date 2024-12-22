@@ -9,3 +9,18 @@
 /dataset_val/CLIC 2020 professional 250/
 .idea/
 /dataset_val/Kodak/
+
+
+.gitignore
+/checkpoint
+/dataset_train
+/dataset_val
+/model
+/outputImages
+Inference_GLIC.py
+MSSSIM-BPP-Kodak.png
+PSNR-BPP-Kodak.png
+README.md
+requirements.txt
+train_GLIC.py
+updata.py
